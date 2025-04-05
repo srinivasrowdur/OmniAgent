@@ -19,13 +19,16 @@ type Message = {
 type ChatInterfaceProps = {
   agentId: string
   agentName: string
+  teamMode?: "collaborate" | "coordinate" | "route"
 }
 
-export function ChatInterface({ agentId, agentName }: ChatInterfaceProps) {
+export function ChatInterface({ agentId, agentName, teamMode = "collaborate" }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      content: `Hello! I'm the ${agentName}. How can I assist you today?`,
+      content: `Hello! I'm the ${agentName}. How can I assist you today?${
+        agentId === "omni" ? ` I'm operating in ${teamMode} mode.` : ""
+      }`,
       role: "assistant",
       timestamp: new Date(),
     },
@@ -180,7 +183,7 @@ export function ChatInterface({ agentId, agentName }: ChatInterfaceProps) {
             body: JSON.stringify({
               query: input,
               model_id: "o3-mini",
-              team_mode: "collaborate"
+              team_mode: teamMode
             })
           });
 

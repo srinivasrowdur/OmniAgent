@@ -13,6 +13,8 @@ type Agent = {
   color: string
 }
 
+type TeamMode = "collaborate" | "coordinate" | "route"
+
 const agents: Agent[] = [
   {
     id: "quality",
@@ -34,13 +36,36 @@ const agents: Agent[] = [
   },
 ]
 
+const teamModes = [
+  {
+    id: "collaborate",
+    name: "Collaborate",
+    description: "All team members work on the same task, with results combined into a comprehensive response."
+  },
+  {
+    id: "coordinate",
+    name: "Coordinate",
+    description: "The Team Leader assigns specific tasks to different experts and combines their insights."
+  },
+  {
+    id: "route",
+    name: "Route",
+    description: "Your query is directed to the single most qualified expert for your specific question."
+  }
+]
+
 export function AgentSelector() {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
+  const [teamMode, setTeamMode] = useState<TeamMode>("collaborate")
   const [chatStarted, setChatStarted] = useState(false)
 
   const handleAgentSelect = (value: string) => {
     setSelectedAgent(value)
     setChatStarted(false)
+  }
+
+  const handleTeamModeSelect = (value: string) => {
+    setTeamMode(value as TeamMode)
   }
 
   const startChat = () => {
@@ -64,13 +89,16 @@ export function AgentSelector() {
               className={`w-3 h-3 rounded-full ${agent.id === "quality" ? "bg-blue-500" : agent.id === "flkh" ? "bg-green-500" : "bg-purple-500"}`}
             ></div>
             <h2 className="text-xl font-semibold">{agent.name}</h2>
+            {agent.id === "omni" && (
+              <span className="text-sm text-muted-foreground">({teamMode} mode)</span>
+            )}
           </div>
           <Button variant="outline" size="sm" onClick={resetSelection}>
             Change Agent
           </Button>
         </div>
 
-        <ChatInterface agentId={selectedAgent} agentName={agent.name} />
+        <ChatInterface agentId={selectedAgent} agentName={agent.name} teamMode={agent.id === "omni" ? teamMode : undefined} />
       </div>
     )
   }
@@ -96,6 +124,25 @@ export function AgentSelector() {
           </div>
         ))}
       </RadioGroup>
+
+      {selectedAgent === "omni" && (
+        <div className="mt-6 border rounded-lg p-4">
+          <h3 className="text-sm font-medium mb-3">Team Mode</h3>
+          <RadioGroup value={teamMode} onValueChange={handleTeamModeSelect} className="space-y-2">
+            {teamModes.map((mode) => (
+              <div key={mode.id} className="flex items-start space-x-2">
+                <RadioGroupItem value={mode.id} id={`team-mode-${mode.id}`} className="mt-1" />
+                <div className="space-y-1">
+                  <Label htmlFor={`team-mode-${mode.id}`} className="text-sm font-medium cursor-pointer">
+                    {mode.name}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">{mode.description}</p>
+                </div>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+      )}
 
       <Button onClick={startChat} disabled={!selectedAgent} className="w-full">
         Start Chat

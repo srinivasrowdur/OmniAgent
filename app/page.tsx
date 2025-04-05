@@ -38,9 +38,9 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-40">
           <div className="container px-4 md:px-6 max-w-screen-xl mx-auto">
-            <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
@@ -59,7 +59,7 @@ export default function LandingPage() {
                   </Link>
                 </div>
               </div>
-              <div className="flex items-center justify-center lg:order-last">
+              <div className="flex items-center justify-center">
                 <AgentAnimation />
               </div>
             </div>
@@ -84,42 +84,42 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 md:grid-cols-2 lg:grid-cols-4">
-              <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm bg-background">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-12 w-full">
+              <div className="flex flex-col items-center space-y-4 rounded-lg border p-6 md:p-8 shadow-sm bg-background h-full">
                 <div className="rounded-full bg-primary/10 p-3">
                   <MessageCircle className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold">Single Interface</h3>
+                <h3 className="text-xl font-bold text-center">Single Interface</h3>
                 <p className="text-center text-sm text-muted-foreground">
                   Communicate with one agent that understands all your needs and coordinates the right specialists.
                 </p>
               </div>
 
-              <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm bg-background">
+              <div className="flex flex-col items-center space-y-4 rounded-lg border p-6 md:p-8 shadow-sm bg-background h-full">
                 <div className="rounded-full bg-primary/10 p-3">
                   <Layers className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold">Multi-Agent Orchestration</h3>
+                <h3 className="text-xl font-bold text-center">Multi-Agent Orchestration</h3>
                 <p className="text-center text-sm text-muted-foreground">
                   Behind the scenes, OmniAgent coordinates with specialized agents to solve complex problems.
                 </p>
               </div>
 
-              <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm bg-background">
+              <div className="flex flex-col items-center space-y-4 rounded-lg border p-6 md:p-8 shadow-sm bg-background h-full">
                 <div className="rounded-full bg-primary/10 p-3">
                   <Zap className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold">Increased Efficiency</h3>
+                <h3 className="text-xl font-bold text-center">Increased Efficiency</h3>
                 <p className="text-center text-sm text-muted-foreground">
                   Save time by eliminating the need to switch between multiple agent interfaces and conversations.
                 </p>
               </div>
 
-              <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm bg-background">
+              <div className="flex flex-col items-center space-y-4 rounded-lg border p-6 md:p-8 shadow-sm bg-background h-full">
                 <div className="rounded-full bg-primary/10 p-3">
                   <Shield className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold">Consistent Experience</h3>
+                <h3 className="text-xl font-bold text-center">Consistent Experience</h3>
                 <p className="text-center text-sm text-muted-foreground">
                   Enjoy a unified, consistent experience regardless of which specialized agents are working for you.
                 </p>
@@ -145,7 +145,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="mx-auto grid max-w-5xl items-center gap-12 py-12 md:grid-cols-2">
+            <div className="mx-auto grid w-full items-center gap-12 py-12 md:grid-cols-2">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
                   <h3 className="text-2xl font-bold">Your Single Point of Contact</h3>
@@ -175,7 +175,7 @@ export default function LandingPage() {
                   width={500}
                   height={500}
                   alt="Agent Orchestration"
-                  className="rounded-xl max-w-full h-auto"
+                  className="rounded-xl max-w-full h-auto object-contain"
                 />
               </div>
             </div>
