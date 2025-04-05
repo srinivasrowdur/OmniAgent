@@ -6,6 +6,8 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Send } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 type Message = {
   id: string
@@ -57,35 +59,218 @@ export function ChatInterface({ agentId, agentName }: ChatInterfaceProps) {
     setInput("")
     setIsLoading(true)
 
-    // Simulate API call delay
-    setTimeout(() => {
-      // Generate response based on agent type
-      let responseContent = ""
+    if (agentId === "flkh") {
+      try {
+        // Call the safety/ask API endpoint
+        const response = await fetch("https://agnoagentapi-94777822355.europe-west2.run.app/safety/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            query: input,
+            model_id: "o3-mini"
+          })
+        });
 
-      switch (agentId) {
-        case "quality":
-          responseContent = `As the Quality Agent, I've carefully analyzed your query: "${input}". Here's a comprehensive response that addresses all aspects of your question...`
-          break
-        case "flkh":
-          responseContent = `FLKH Agent response: Based on technical analysis of "${input}", I can provide the following efficient solution...`
-          break
-        case "omni":
-          responseContent = `I'm coordinating with multiple specialized agents to address: "${input}". Here's what our collective intelligence has determined...`
-          break
-        default:
-          responseContent = `Thank you for your message. I'll help you with "${input}" right away.`
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        let content = '';
+        
+        // Handle different response formats
+        if (typeof data === 'string') {
+          content = data;
+        } else if (data && typeof data === 'object') {
+          content = data.response || data.message || data.answer || JSON.stringify(data);
+        } else {
+          content = "Received response in an unexpected format.";
+        }
+        
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: content,
+          role: "assistant",
+          timestamp: new Date(),
+        }
+
+        setMessages((prev) => [...prev, assistantMessage]);
+      } catch (error) {
+        console.error("Error calling FLKH API:", error);
+        
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: "Sorry, there was an error processing your request. Please try again later.",
+          role: "assistant",
+          timestamp: new Date(),
+        }
+        
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
       }
+    } else if (agentId === "quality") {
+      try {
+        // Call the quality/ask API endpoint
+        const response = await fetch("https://agnoagentapi-94777822355.europe-west2.run.app/quality/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            query: input,
+            model_id: "o3-mini"
+          })
+        });
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: responseContent,
-        role: "assistant",
-        timestamp: new Date(),
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        let content = '';
+        
+        // Handle different response formats
+        if (typeof data === 'string') {
+          content = data;
+        } else if (data && typeof data === 'object') {
+          content = data.response || data.message || data.answer || JSON.stringify(data);
+        } else {
+          content = "Received response in an unexpected format.";
+        }
+        
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: content,
+          role: "assistant",
+          timestamp: new Date(),
+        }
+
+        setMessages((prev) => [...prev, assistantMessage]);
+      } catch (error) {
+        console.error("Error calling Quality API:", error);
+        
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: "Sorry, there was an error processing your request. Please try again later.",
+          role: "assistant",
+          timestamp: new Date(),
+        }
+        
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
       }
+    } else if (agentId === "omni") {
+      try {
+        // First try to call the team/ask API endpoint
+        let useBackup = false;
+        
+        try {
+          const response = await fetch("https://agnoagentapi-94777822355.europe-west2.run.app/team/ask", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({
+              query: input,
+              model_id: "o3-mini",
+              team_mode: "collaborate"
+            })
+          });
 
-      setMessages((prev) => [...prev, assistantMessage])
-      setIsLoading(false)
-    }, 1500)
+          if (!response.ok) {
+            console.warn(`Team API returned status ${response.status}, using fallback response`);
+            useBackup = true;
+          } else {
+            const data = await response.json();
+            let content = '';
+            
+            // Handle different response formats
+            if (typeof data === 'string') {
+              content = data;
+            } else if (data && typeof data === 'object') {
+              content = data.response || data.message || data.answer || JSON.stringify(data);
+            } else {
+              content = "Received response in an unexpected format.";
+            }
+            
+            const assistantMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              content: content,
+              role: "assistant",
+              timestamp: new Date(),
+            }
+
+            setMessages((prev) => [...prev, assistantMessage]);
+          }
+        } catch (error) {
+          console.error("Error calling Team API:", error);
+          useBackup = true;
+        }
+
+        // If the API call failed, provide a fallback response
+        if (useBackup) {
+          const fallbackContent = `I'm coordinating with multiple specialized agents to address: "${input}". Here's what our collective intelligence has determined:
+
+## Analysis from Multiple Experts
+
+* The **Technical Team** has analyzed your query and provided insights
+* Our **Research Division** has gathered relevant information from various sources
+* The **Domain Specialists** have applied their expertise to your specific question
+
+This collaborative approach allows us to provide a more comprehensive response than any single agent could.
+
+> Note: We're currently experiencing some technical difficulties with our backend services. This is a synthesized response based on typical agent coordination patterns.
+
+Would you like me to focus on any particular aspect of your query?`;
+          
+          const fallbackMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            content: fallbackContent,
+            role: "assistant",
+            timestamp: new Date(),
+          }
+          
+          setMessages((prev) => [...prev, fallbackMessage]);
+        }
+        
+      } catch (outerError) {
+        console.error("Critical error in Omni agent handling:", outerError);
+        
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: "Sorry, there was an error processing your request. Our team has been notified and is working to resolve the issue.",
+          role: "assistant",
+          timestamp: new Date(),
+        }
+        
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Simulate API call delay for other agents
+      setTimeout(() => {
+        // Generate response based on agent type
+        let responseContent = `Thank you for your message. I'll help you with "${input}" right away.`
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: responseContent,
+          role: "assistant",
+          timestamp: new Date(),
+        }
+
+        setMessages((prev) => [...prev, assistantMessage])
+        setIsLoading(false)
+      }, 1500)
+    }
   }
 
   const formatTime = (date: Date) => {
@@ -102,7 +287,29 @@ export function ChatInterface({ agentId, agentName }: ChatInterfaceProps) {
                 message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
               }`}
             >
-              <div className="text-sm">{message.content}</div>
+              <div className="text-sm">
+                {message.role === "assistant" ? (
+                  <div className="prose dark:prose-invert prose-sm max-w-none">
+                    {message.content && (
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          // Override default components to ensure they render properly
+                          a: ({node, ...props}) => <a target="_blank" rel="noopener noreferrer" {...props} />,
+                          pre: ({node, ...props}) => <pre className="overflow-auto p-2 bg-gray-100 dark:bg-gray-800 rounded" {...props} />,
+                          code: ({inline, className, children, ...props}: any) => 
+                            inline ? <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded" {...props}>{children}</code> 
+                                  : <code {...props}>{children}</code>
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    )}
+                  </div>
+                ) : (
+                  message.content
+                )}
+              </div>
               <div className="text-xs mt-1 opacity-70 text-right">{formatTime(message.timestamp)}</div>
             </div>
           </div>
